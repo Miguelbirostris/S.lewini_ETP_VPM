@@ -8,9 +8,9 @@ Putative title
 
 We have the nails but not the hammers! Virtual population model of the Critically endangere Scalloped Hammerhead (Sphyrna lewini) in the Eastern Tropical Pacific
 
-Miguel de Jesús Gómez García*, Alex Hearn, Easton R. White.
+Miguel de Jesús Gómez García*, Alex Hearn, Espinoza, M, Easton R. White.
 
-*Correspondence author. mdg1047@usnh.edu
+*Correspondence author. mdg1047@usnh.edu. midejgoga@gmail.com
 
 Bibliography
 
