@@ -7,7 +7,7 @@
 
 #Created by Miguel de Jesus Gomez Garcia
 #Created: 20-November-2025
-#Last edited: 09-Apr-2026
+#Last edited: 15-May-2026
 #First uploaded to GitHub on 07-Apr-2026
 
 
@@ -89,7 +89,7 @@ amax <- log(
   ((Linf*0.99)*(Linf*L0))/ (L0*(Linf-((Linf*0.99))))
 ) /gs 
 
-#From vertebrae varies from 11 to 35. Estimations go up to 55. We averaged using these values
+#From vertebrae varies from 11 to 35. Estimations go up to 55. # Longevity average, literature. We used these values
 amax <- mean(c(12.5,11,35,24.4,21.1)) 
 
 # NaturalMortality calculation Ms
@@ -271,7 +271,7 @@ p <- 0.5
 N_t <- c(10000, 1000, 500, 400, 1000, 500, 200, 200)
 
 
-# Time in each life stage (same order as your T_im)
+# Time in each male stage (same order as your T_im)
 
 T_i <-c(1, 1,amat_m-1,amax-amat_m, 1, amat_f-1, 1, 1)
 
@@ -305,7 +305,7 @@ out_matrix <- jags(data = win.data,
                    DIC=F)
 
 
-#MCMC vis to quickly check traceplots and densities
+#MCMC vis to quickly check traveplots and densities
 MCMCtrace(out_matrix, 
           params = c("M"), 
           pdf = FALSE)
@@ -387,11 +387,10 @@ x<-sapply(A_t_list, function(A) {
 })
 
 
-#Mean lambda
+#Mean Mlambda
 # Compute mean matrix from list of matrices
 mean_lambda <- mean(lambdas)
 sd(lambdas)
-
 #n lambdas, just to chek its one per itteration
 
 length(lambdas)
@@ -407,7 +406,6 @@ length(lambdas[lambdas>1])/length(lambdas)
 
 mean(lambdas)
 sd(lambdas)
-
 ##Append mortalities and lambda to matrix list
 
 A_t_list$M<-mean_M
@@ -552,7 +550,9 @@ popb_summary <- popb_proj_df %>%
 
 #Spaghetti plots
 
-#Ease visualization trimming extreme values
+
+
+#ease visualization trimming extreme values
 popb_proj_dftrim<-popb_proj_df[popb_proj_df$Population<10000 & popb_proj_df$Population> 0,]
 
 #THIS TRIM PICKs UP lAMBDA CRITICAL VALUES ONLY!!
@@ -704,7 +704,7 @@ simmilar_slopes<-comparisons[comparisons$p_two_sided>0.05,]
 ##Evaluate percentage of iterations above and below lambda. ---------------
 
 
-#proportion of iterations within lambda critical
+#proportion of iterations withing lambda critical
 
 
 common_iterations <- intersect(
@@ -843,7 +843,7 @@ sim_pop_long <- sim_pop%>%
 
 
 
-#Group and get minimum and maximum parameter value per estimate
+# group and get minimum and maximum parameter value per estimate
 
 parameter_summary<-sim_pop_long%>%group_by(Variable)%>%
   summarize(mean=mean(Estimate),
@@ -860,13 +860,13 @@ write.csv(parameter_summary,"ParameterEstimates.csv")
 #With additional columns 
 
 parameter_summary_extra<-parameter_summary%>%mutate(
-  # Extract the base parameter 
+  # 1. Extract the base parameter 
   Parameter = str_extract(Variable, "^[^_]+"),
   
-  # Extract everything after the first underscore (stage + sex)
+  # 2. Extract everything after the first underscore (stage + sex)
   Detail = str_remove(Variable, "^[^_]+_"),
   
-  # Extract Stage (first word after the parameter)
+  # 3. Extract Stage (first word after the parameter)
   Stage = case_when(
     str_detect(Detail, "Neonates") ~ "Neonates",
     str_detect(Detail, "Juvenile") ~ "Juvenile",
@@ -876,7 +876,7 @@ parameter_summary_extra<-parameter_summary%>%mutate(
     TRUE ~ NA_character_
   ),
   
-  # Extract Sex
+  # 4. Extract Sex
   Sex = case_when(
     str_detect(Detail, "Males")   ~ "Male",
     str_detect(Detail, "Females") ~ "Female",
@@ -938,25 +938,27 @@ iter_keep <- unique(sim_pop$Iteration)
 
 # Extract only those iterations from the list
 
+
+
 A_t_extract <- A_t_list[iter_keep]
 
 A_t_extract_mean <-Reduce("+", A_t_extract) / length(A_t_extract)
 
 
-# Eigen decomposition
+# 1. Eigen decomposition
 eigen_analysis <- eigen(A_t_extract_mean)
 lambda <- Re(eigen_analysis$values[1])  # Dominant eigenvalue
 w <- Re(eigen_analysis$vectors[, 1])   # Right eigenvector (stable stage distribution)
 v <- Re(eigen(t(A_t_extract_mean))$vectors[, 1])    # Left eigenvector (reproductive values)
 
-# Normalize eigenvectors
+# 2. Normalize eigenvectors
 w <- w / sum(w)  # Normalize stable stage distribution
 v <- v / v[1]    # Normalize reproductive values by first element
 
-# Scalar product of w and v
+# 3. Scalar product of w and v
 scalar_product <- sum(w * v)
 
-# Elasticity matrix calculation
+# 4. Elasticity matrix calculation
 elasticity_matrix <- matrix(0, nrow = nrow(A_t_extract_mean), ncol = ncol(A_t_extract_mean))  # Initialize
 
 for (i in 1:nrow(A_t_extract_mean)) {
@@ -1064,7 +1066,7 @@ Av_stage_elas<-elasticity_df_nonzero|>group_by(Stage,sex)%>%
   summarise(elasticity=mean(elasticity))
 print(Av_stage_elas)
 
-# Elasticities by transition type Check 
+# 4. Elasticities by transition type Check 
 elasticity_transition <- elasticity_df %>%
   filter(elasticity != 0) %>%
   mutate(cell = paste0("(", row, ",", col, ")"),
@@ -1621,7 +1623,7 @@ x<-sapply(A_t_list, function(A) {
 
 head(x)
 
-#Mean lambda
+#Mean Mlambda
 # Compute mean matrix from list of matrices
 mean_lambda <- mean(lambdas)
 sd(lambdas)
@@ -2548,7 +2550,7 @@ Z_all <- out_matrix$BUGSoutput$sims.list$Z
 #Natural mortality
 M_all <- out_matrix$BUGSoutput$sims.list$M  
 #Fishing mortality
-Fs_all <- out_matrix$BUGSoutput$sims.list$Fs  
+Fs_all <- out_matrix$BUGSoutput$sims.list$Fs
 
 
 
@@ -2577,6 +2579,11 @@ n_iter <- nrow(A_raw)
 # Initialize a list to store matrices per iteration
 A_t_list <- vector("list", n_iter)
 
+
+##***Important Note***##
+##This object "A_t_list" contains the posterior matrices for the scenario. You can use this object to extract stage-specific transitions and the overal mean matrix (A_t_mean further down).
+
+
 # Loop over iterations and fill in the matrix
 for (i in 1:n_iter) {
   A <- matrix(0, nrow = 8, ncol = 8)
@@ -2602,7 +2609,11 @@ for (i in 1:n_iter) {
 
 #Mean Matrix
 # Compute mean matrix from list of matrices
+
+
 A_t_mean <- Reduce("+", A_t_list) / n_iter
+
+write.table(A_t_mean, "ScenarioMeanMatrix.txt")
 
 #Lambdas
 
@@ -2912,8 +2923,10 @@ print (v_plot_full_Scenario)
 ggsave("ViolinPlot_Full_Current.jpg", plot = v_plot_full_Scenario,
        width = 12, height = 10, dpi = 300)
 
-  #For example. Saving a plot for the overall 50% reduction df
 # ggsave("ViolinPlot_Full_50Reduced.jpg", plot = v_plot_full_Reduced_Fishing,
+#        width = 12, height = 10, dpi = 300)
+
+# ggsave("ViolinPlot_Full_ElasticReduced.jpg", plot = v_plot_full_Reduced_Fishing,
 #        width = 12, height = 10, dpi = 300)
 
 
